@@ -1,0 +1,26 @@
+import { NextApiRequest } from 'next';
+
+type IField = {
+	title: string;
+	name: string;
+	type: string;
+};
+interface NextApiRequestExtended extends NextApiRequest {
+	user: any;
+	files: any;
+	params: any;
+}
+
+interface JwtPayload {
+	id: string;
+	role: string;
+	name: string;
+	email: string;
+	iat: number;
+	exp: number;
+}
+
+type ImagesType = {
+	_id: string;
+	name: string;
+};
