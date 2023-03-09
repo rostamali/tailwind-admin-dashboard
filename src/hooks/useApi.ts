@@ -1,4 +1,4 @@
-import ApiService from '@/HttpService/ApiService';
+import ApiService from 'src/HttpService/ApiService';
 import { toast } from 'react-toastify';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -46,6 +46,21 @@ export const useUpdateData = (key: string) => {
 	const queryClient = useQueryClient();
 	return useMutation(
 		async (data: any) => await ApiService.update(data.url, data.body),
+		{
+			onSuccess: (res) => {
+				queryClient.invalidateQueries([key]);
+				toast.success(res.message);
+			},
+			onError: (err: any) => {
+				toast.success(err.response.data.message);
+			},
+		},
+	);
+};
+export const useUpdateMultipartData = (key: string) => {
+	const queryClient = useQueryClient();
+	return useMutation(
+		async (data: any) => await ApiService.updateFile(data.url, data.body),
 		{
 			onSuccess: (res) => {
 				queryClient.invalidateQueries([key]);

@@ -3,22 +3,25 @@ import dynamic from 'next/dynamic';
 import { Tabs } from 'flowbite-react';
 import { BiLockOpen, BiUserCircle } from 'react-icons/bi';
 import { HiEye, HiEyeOff } from 'react-icons/hi';
-import AdminAuthLayout from '@/components/layouts/AdminAuthLayout';
+import AdminAuthLayout from 'src/components/layouts/AdminAuthLayout';
 import Head from 'next/head';
-import { useFetchData, useUpdateData } from '@/hooks/useApi';
-import Spinner from '@/components/common/Spinner';
+import { useFetchData, useUpdateData } from 'src/hooks/useApi';
+import Spinner from 'src/components/common/shared/Spinner';
 import { useForm } from 'react-hook-form';
-import ButtonLoader from '@/components/common/ButtonLoader';
+import ButtonLoader from 'src/components/common/shared/ButtonLoader';
 const AdminPageTitle = dynamic(
-	() => import('@/components/common/AdminPageTitle'),
+	() => import('src/components/common/admin/AdminPageTitle'),
 	{
 		ssr: false,
 	},
 );
-const SelectPhotos = dynamic(() => import('@/components/common/SelectPhotos'), {
-	ssr: false,
-});
-const Picture = dynamic(() => import('@/components/common/Picture'), {
+const SelectPhotos = dynamic(
+	() => import('src/components/common/admin/SelectPhotos'),
+	{
+		ssr: false,
+	},
+);
+const Picture = dynamic(() => import('src/components/common/shared/Picture'), {
 	ssr: false,
 });
 
@@ -41,11 +44,10 @@ const AccountSetting = () => {
 	const updateUser = (data: any) => {
 		data.thumbnail = photo[0];
 		updateUserInfo({
-			url: `/api/auth/update`,
+			url: `/api/auth/update/admin`,
 			body: data,
 		});
 	};
-
 	return (
 		<>
 			<Head>
@@ -84,17 +86,21 @@ const AccountSetting = () => {
 											<Picture
 												link={`/uploads/${photo[0]}`}
 												classList={
-													'h-[120px] w-[120px] border-2 border-[#6259CA] rounded-full'
+													'h-[120px] w-[120px] border-2 border-orange-dark rounded-full'
 												}
-												alt={''}
+												alt={'user'}
 											/>
 										) : (
 											<Picture
 												link={`/uploads/${user.data.thumbnail}`}
 												classList={
-													'h-[120px] w-[120px] border-2 border-[#6259CA] rounded-full'
+													'h-[120px] w-[120px] border-2 border-orange-dark rounded-full'
 												}
-												alt={user.data.name}
+												alt={
+													user.status === 'success'
+														? user.data.userName
+														: 'User'
+												}
 											/>
 										)}
 										<div>
@@ -103,7 +109,7 @@ const AccountSetting = () => {
 												handler={setPhoto}
 												single={true}
 												defaultVal={photo}
-												preview={false}
+												btnClass={''}
 											/>
 											<span className="pt-2 block">
 												Only allow png & jpg files
@@ -113,17 +119,20 @@ const AccountSetting = () => {
 									<div className="grid grid-cols-2 gap-8">
 										<div className="input__group flex flex-col">
 											<label
-												htmlFor="name"
+												htmlFor="userName"
 												className="input__label"
 											>
-												Full Name
+												Username
 											</label>
 											<input
-												id="name"
+												id="userName"
 												type="text"
-												defaultValue={user.data.name}
+												defaultValue={
+													user.data.userName
+												}
+												disabled
 												className="input__field"
-												{...register('name')}
+												{...register('userName')}
 											/>
 										</div>
 										<div className="input__group">
@@ -136,11 +145,47 @@ const AccountSetting = () => {
 											<input
 												type="email"
 												id="email"
+												disabled
 												defaultValue={user.data.email}
 												className="input__field"
 												{...register('email')}
 											/>
 										</div>
+										<div className="input__group flex flex-col">
+											<label
+												htmlFor="firstName"
+												className="input__label"
+											>
+												Fist Name
+											</label>
+											<input
+												id="firstName"
+												type="text"
+												defaultValue={
+													user.data.firstName
+												}
+												className="input__field"
+												{...register('firstName')}
+											/>
+										</div>
+										<div className="input__group flex flex-col">
+											<label
+												htmlFor="lastName"
+												className="input__label"
+											>
+												Last Name
+											</label>
+											<input
+												id="lastName"
+												type="text"
+												defaultValue={
+													user.data.lastName
+												}
+												className="input__field"
+												{...register('lastName')}
+											/>
+										</div>
+
 										<div className="input__group">
 											<label className="input__label">
 												Role

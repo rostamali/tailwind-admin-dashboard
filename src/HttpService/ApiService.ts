@@ -25,6 +25,10 @@ class HttpService {
 		const data = await httpReq.createMultipart(url, body);
 		return data;
 	}
+	async updateFile(url: string, body: any) {
+		const data = await httpReq.updateMultipart(url, body);
+		return data;
+	}
 }
 
 const ApiService = new HttpService();

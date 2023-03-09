@@ -1,24 +1,17 @@
 import { FcGoogle } from 'react-icons/fc';
 import { MdFacebook } from 'react-icons/md';
 import Link from 'next/link';
-import Picture from '../common/Picture';
+import Picture from '../common/shared/Picture';
 
 const AuthHeader = ({ title }: { title: string }) => {
 	return (
 		<>
 			<div className="form-header">
-				{/* <Link href="/">
-					<Picture
-						link={'/assets/logo.png'}
-						classList={'h-[28px] w-[28px]'}
-						alt={''}
-					/>
-				</Link> */}
-				<h3 className="font-mulish md:text-3xl text-center text-2xl font-extrabold pb-12">
+				<h3 className="font-mulish md:text-3xl text-center sm:text-2xl text-lg font-extrabold pb-12">
 					{title}
 				</h3>
 			</div>
-			<div className="social-login grid grid-cols-2 sm:gap-4 gap-2 mb-10">
+			{/* <div className="social-login grid grid-cols-2 sm:gap-4 gap-2 mb-10">
 				<button className="border-2 border-gray-light rounded flex items-center justify-center py-3 px-2 ">
 					<FcGoogle className="text-xl sm:mr-4 mr-1" />
 					<span className="sm:text-base text-xs font-mulish font-semibold text-black">
@@ -34,7 +27,7 @@ const AuthHeader = ({ title }: { title: string }) => {
 						Login with Facebook
 					</span>
 				</button>
-			</div>
+			</div> */}
 		</>
 	);
 };

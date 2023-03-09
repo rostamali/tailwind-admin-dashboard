@@ -1,10 +1,10 @@
-import { NextApiRequestExtended } from '@/types';
-import CatchAsync from '@/utils/catchAsync';
 import { NextApiResponse } from 'next';
-import File from '../models/filemodels';
+import File from '../models/filemodel';
 const multer = require('multer');
 import path from 'path';
 import fs from 'fs';
+import { NextApiRequestExtended } from 'src/types';
+import CatchAsync from 'src/utils/catchAsync';
 const Jimp = require('jimp');
 export const config = {
 	api: {
@@ -27,8 +27,10 @@ const upload = multer({
 	storage: multerStorage,
 	fileFilter: multerFilter,
 });
-export const uploadImages = upload.array('images');
 
+// ================ Admin Uploads Photo
+
+export const uploadImages = upload.array('images');
 export const resizeUserPhoto = CatchAsync(
 	async (req: NextApiRequestExtended, res: NextApiResponse, next: any) => {
 		const images = req.files;
@@ -88,5 +90,25 @@ export const deleteImage = CatchAsync(
 		res.status(200).send({
 			message: 'File is deleted',
 		});
+	},
+);
+
+// ================ User Uploads Photo
+export const userUploadImages = upload.array('thumbnail');
+export const resizeUserThumbanil = CatchAsync(
+	async (req: NextApiRequestExtended, res: NextApiResponse, next: any) => {
+		const images = req.files;
+		if (images.length === 0) throw new Error('Provide valid images');
+		req.body.thumbnail = [];
+		for (const image of images) {
+			const selectedImage = await Jimp.read(image.buffer);
+			selectedImage.resize(500, Jimp.AUTO);
+			const fileName = `${req.user._id}-${Date.now()}.${
+				image.mimetype.split('/')[1]
+			}`;
+			await selectedImage.write(`./public/uploads/${fileName}`);
+			req.body.thumbnail.push(fileName);
+		}
+		next();
 	},
 );

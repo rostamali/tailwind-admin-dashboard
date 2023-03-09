@@ -1,17 +1,23 @@
-import type { NextApiResponse, NextApiRequest } from 'next';
+import type { NextApiResponse } from 'next';
 import { createRouter, expressWrapper } from 'next-connect';
 import cors from 'cors';
 import { onError, onNoMatch } from '../../../utils/errorHandler';
 import dbConnect from '../../../backend/dbConnect';
-import { NextApiRequestExtended } from '@/types';
+import { NextApiRequestExtended } from 'src/types';
 import {
 	deleteImage,
 	getImages,
 	resizeUserPhoto,
+	resizeUserThumbanil,
 	setImageInDb,
 	uploadImages,
-} from '@/backend/controller/filecontroller';
-import { authorized, restictUser } from '@/backend/controller/usercontroller';
+	userUploadImages,
+} from 'src/backend/controller/filecontroller';
+import {
+	authorized,
+	restictUser,
+	updateUser,
+} from 'src/backend/controller/usercontroller';
 const router = createRouter<NextApiRequestExtended, NextApiResponse>();
 
 export const config = {
@@ -35,7 +41,20 @@ router
 		resizeUserPhoto,
 		setImageInDb,
 	)
-	.delete('/api/file/delete/:name', deleteImage);
+	.put(
+		'/api/file/update/user',
+		authorized,
+		restictUser('user'),
+		userUploadImages,
+		resizeUserThumbanil,
+		updateUser,
+	)
+	.delete(
+		'/api/file/delete/:name',
+		authorized,
+		restictUser('admin'),
+		deleteImage,
+	);
 
 export default router.handler({
 	onError,

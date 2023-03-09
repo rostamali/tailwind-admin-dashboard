@@ -3,17 +3,19 @@ import Lightbox from 'react-image-lightbox';
 import 'react-image-lightbox/style.css';
 import { HiEye, HiOutlineTrash, HiLink } from 'react-icons/hi';
 import { BiImageAdd } from 'react-icons/bi';
-import AdminPageTitle from '@/components/common/AdminPageTitle';
-import ImageUploader from '@/components/common/ImageUploader';
+import AdminPageTitle from 'src/components/common/admin/AdminPageTitle';
+import ImageUploader from 'src/components/common/admin/ImageUploader';
 import { Modal } from 'flowbite-react';
-import Picture from '@/components/common/Picture';
-import AdminAuthLayout from '@/components/layouts/AdminAuthLayout';
-import { useDeleteData, useFetchData } from '@/hooks/useApi';
-import { ImagesType } from '@/types';
-import Spinner from '@/components/common/Spinner';
-import Empty from '@/components/common/Empty';
+import Picture from 'src/components/common/shared/Picture';
+import AdminAuthLayout from 'src/components/layouts/AdminAuthLayout';
+import { useDeleteData, useFetchData } from 'src/hooks/useApi';
+import { ImagesType } from 'src/types';
+import Spinner from 'src/components/common/shared/Spinner';
+import Empty from 'src/components/common/admin/Empty';
 import Head from 'next/head';
-import CustomPagination from '@/components/common/CustomPagination';
+import CustomPagination from 'src/components/common/shared/CustomPagination';
+import { handleDeleteConfirm } from 'src/utils/confirmation';
+import { toast } from 'react-toastify';
 const Gallery = () => {
 	const [showUploadImage, setShowUploadImage] = useState(false);
 	const [page, setPage] = useState(1);
@@ -23,23 +25,26 @@ const Gallery = () => {
 	});
 
 	const { data: images, isLoading } = useFetchData(
-		`/api/file/images?page=${page}&limit=9`,
+		`/api/file/images?page=${page}&limit=6`,
 		'images',
 		page,
 	);
 	const { mutate: deleteImage } = useDeleteData('images');
 	const handleDeleteImage = (name: string) => {
-		deleteImage(`/api/file/delete/${name}`);
+		handleDeleteConfirm('Are you sure ?', 'Image will be deleted !').then(
+			(result) => {
+				if (result.isConfirmed) {
+					deleteImage(`/api/file/delete/${name}`);
+				}
+			},
+		);
 	};
 
-	if (isLoading)
-		return (
-			<>
-				<div className="h-[70vh] flex items-center justify-center">
-					<Spinner />
-				</div>
-			</>
-		);
+	const handleLinkCopy = (link: string) => {
+		navigator.clipboard.writeText(`/uploads/${link}`);
+		toast.success('Link Copied');
+	};
+
 	return (
 		<>
 			<Head>
@@ -66,7 +71,11 @@ const Gallery = () => {
 					</button>
 				</div>
 				<div className="bg-white p-10 rounded-lg">
-					{images.data.length > 0 ? (
+					{isLoading ? (
+						<div className="h-[70vh] flex items-center justify-center">
+							<Spinner />
+						</div>
+					) : images.data.length > 0 ? (
 						<>
 							<div className="grid grid-cols-3 gap-8">
 								{images.data.map(
@@ -84,7 +93,7 @@ const Gallery = () => {
 											/>
 											<div className="photo-overlay absolute top-0 left-0 bg-[#24282857] w-full h-full items-center justify-center gap-3 duration-300 opacity-0 hidden group-hover:opacity-100 group-hover:flex">
 												<button
-													className="bg-[#6259CA] h-9 w-9 flex items-center justify-center rounded-full duration-300 hover:scale-[1.2]"
+													className="bg-orange-dark h-9 w-9 flex items-center justify-center rounded-full duration-300 hover:scale-[1.2]"
 													onClick={() =>
 														setIsOpen({
 															open: true,
@@ -95,7 +104,7 @@ const Gallery = () => {
 													<HiEye className="text-xl text-[#F0F1FF]" />
 												</button>
 												<button
-													className="bg-[#6259CA] h-9 w-9 flex items-center justify-center rounded-full duration-300 hover:scale-[1.2]"
+													className="bg-orange-dark h-9 w-9 flex items-center justify-center rounded-full duration-300 hover:scale-[1.2]"
 													onClick={() =>
 														handleDeleteImage(
 															item.name,
@@ -104,7 +113,14 @@ const Gallery = () => {
 												>
 													<HiOutlineTrash className="text-xl text-[#F0F1FF]" />
 												</button>
-												<button className="bg-[#6259CA] h-9 w-9 flex items-center justify-center rounded-full duration-300 hover:scale-[1.2]">
+												<button
+													className="bg-orange-dark h-9 w-9 flex items-center justify-center rounded-full duration-300 hover:scale-[1.2]"
+													onClick={() =>
+														handleLinkCopy(
+															item.name,
+														)
+													}
+												>
 													<HiLink className="text-xl text-[#F0F1FF]" />
 												</button>
 											</div>

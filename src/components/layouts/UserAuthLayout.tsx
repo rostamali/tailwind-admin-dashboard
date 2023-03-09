@@ -1,8 +1,8 @@
-import { useCreateData, useFetchData } from '@/hooks/useApi';
-import Spinner from '../common/Spinner';
-import Login from '@/pages/login';
-import Picture from '../common/Picture';
-import { FaList, FaMapMarkerAlt } from 'react-icons/fa';
+import { useCreateData, useFetchData } from 'src/hooks/useApi';
+import Spinner from '../common/shared/Spinner';
+import Login from 'src/pages/login';
+import Picture from '../common/shared/Picture';
+import { FaList } from 'react-icons/fa';
 import {
 	MdDashboardCustomize,
 	MdAccountCircle,
@@ -26,11 +26,6 @@ const UserAuthLayout = ({ children }: any) => {
 			path: '/user/my-account',
 		},
 		{
-			icons: MdOutlineSecurity,
-			label: 'Security',
-			path: '/user/security',
-		},
-		{
 			icons: FaList,
 			label: 'Orders',
 			path: '/user/orders',
@@ -51,86 +46,109 @@ const UserAuthLayout = ({ children }: any) => {
 		setLoading(false);
 	}, [router.pathname]);
 
-	console.log('Loading ->', loading);
-
 	return (
 		<>
 			{!isLoading ? (
 				user.status === 'success' ? (
-					<div
-						id="user-layouts"
-						className="bg-[#EAEDF7] py-20 h-screen"
-					>
-						<div className="container mx-auto h-full">
-							<div className="flex gap-8 h-full">
-								<div className="bg-white h-full w-[320px] py-10 px-10 rounded-md flex flex-col justify-between">
-									<div className="user-menu-profile">
-										<div className="flex flex-col gap-4 items-center justify-center">
-											<div className="bg-white h-32 w-32 flex items-center justify-center rounded-full border border-[#6259CA]">
-												<Picture
-													link={
-														user.data.thumbnail
-															? `/uploads/${user.data.thumbnail}`
-															: '/uploads/user.png'
-													}
-													classList={
-														'h-28 w-28 rounded-full'
-													}
-													alt={user.data.name}
-												/>
+					<>
+						<div
+							id="user-layouts"
+							className="bg-[#EAEDF7] py-20 h-screen"
+						>
+							<div className=" mx-auto h-full lg:w-[1450px]">
+								<div className="flex gap-8 h-full">
+									<div className="bg-white h-full w-[320px] py-10 px-10 rounded-md flex flex-col justify-between">
+										<div className="user-menu-profile">
+											<div className="flex flex-col gap-4 items-center justify-center">
+												<div className="bg-white h-32 w-32 flex items-center justify-center rounded-full border-2 border-orange-dark">
+													<Picture
+														link={
+															user.data
+																? `/uploads/${user.data.thumbnail}`
+																: '/uploads/user.png'
+														}
+														classList={
+															'h-28 w-28 rounded-full'
+														}
+														alt={
+															user.data.name
+																? user.data.name
+																: user.data
+																		.userName
+														}
+													/>
+												</div>
+												<div className="text-center">
+													<h4 className="text-xl font-semibold text-[#A8ADB0] capitalize">
+														Hello,
+													</h4>
+													<h4 className="text-xl font-bold text-[#0E0E23] capitalize">
+														{user.data.name
+															? user.data.name
+															: user.data
+																	.userName}
+													</h4>
+												</div>
 											</div>
-											<div className="text-center">
-												<h4 className="text-xl font-semibold text-[#A8ADB0] capitalize">
-													Hello,
-												</h4>
-												<h4 className="text-xl font-bold text-[#0E0E23] capitalize">
-													{user.data.name}
-												</h4>
-											</div>
+											<ul className="user-menu mt-10">
+												{menu.map((item, index) => (
+													<li key={index}>
+														<Link
+															href={item.path}
+															className={`flex items-center gap-4 font-medium text-base capitalize py-3 px-6 rounded-[5px] mb-4 ${
+																router.pathname ===
+																item.path
+																	? 'bg-orange-dark text-white btn-shadow'
+																	: 'text-black'
+															}`}
+														>
+															<item.icons
+																className={`text-lg  ${
+																	router.pathname ===
+																	item.path
+																		? 'text-[#fff]'
+																		: 'text-orange-dark'
+																}`}
+															/>
+															{item.label}
+														</Link>
+													</li>
+												))}
+											</ul>
 										</div>
-										<ul className="user-menu mt-10">
-											{menu.map((item, index) => (
-												<li key={index}>
-													<Link
-														href={item.path}
-														className={`text-[#0E0E23] mb-3 h-[45px] flex items-center gap-3 rounded-md pl-[20px] text-base font-semibold ${
-															router.pathname ===
-															item.path
-																? 'bg-[#F4F5FE] user-link-shadow'
-																: ''
-														}`}
-													>
-														<item.icons className="text-lg text-[#6259CA]" />
-														{item.label}
-													</Link>
-												</li>
-											))}
-										</ul>
+										<div className="flex flex-col gap-4">
+											<button
+												className="submit__btn"
+												onClick={handleLogout}
+											>
+												Log out
+											</button>
+											<Link
+												href="/"
+												className="border-2 border-orange-dark text-black font-medium text-base uppercase py-3 px-6 rounded-[5px] text-center"
+											>
+												Back to Home
+											</Link>
+										</div>
 									</div>
-									<button
-										className="submit__btn"
-										onClick={handleLogout}
+									<div
+										className={`bg-white flex-1 rounded-md
+							`}
 									>
-										Log out
-									</button>
-								</div>
-								<div
-									className={`bg-white flex-1 rounded-md
-								`}
-								>
-									<div className="admin-content-wrapper px-14 py-14">
-										{!loading ? (
-											children
-										) : (
-											<div className="flex items-center justify-center h-full">
-												<Spinner />
-											</div>
-										)}
+										<div className="admin-content-wrapper px-14 py-14">
+											{!loading ? (
+												children
+											) : (
+												<div className="flex items-center justify-center h-full">
+													<Spinner />
+												</div>
+											)}
+										</div>
 									</div>
 								</div>
 							</div>
 						</div>
-					</div>
+					</>
 				) : (
 					<Login />
 				)

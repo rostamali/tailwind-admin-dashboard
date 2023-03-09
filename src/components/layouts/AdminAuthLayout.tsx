@@ -1,9 +1,9 @@
-import { useFetchData } from '@/hooks/useApi';
+import { useFetchData } from 'src/hooks/useApi';
 import { useState } from 'react';
-import Spinner from '../common/Spinner';
-import DrawerMenu from '../common/DrawerMenu';
-import AdminHeader from '../common/AdminHeader';
-import Login from '@/pages/login';
+import Spinner from '../common/shared/Spinner';
+import DrawerMenu from '../common/admin/DrawerMenu';
+import AdminHeader from '../common/admin/AdminHeader';
+import Login from 'src/pages/login';
 
 const AdminAuthLayout = ({ children }: any) => {
 	const [open, setOpen] = useState<boolean>(false);
@@ -17,21 +17,25 @@ const AdminAuthLayout = ({ children }: any) => {
 		<>
 			{!isLoading ? (
 				user.status === 'success' ? (
-					<div id="admin-layouts" className="">
-						<DrawerMenu navOpen={open} />
-						<AdminHeader handler={setOpen} value={open} />
-						<div
-							className={`bg-[#EAEDF7] min-h-screen pt-[60px] ${
-								open ? 'pl-[100px]' : 'pl-[240px]'
-							}`}
-						>
-							<>
-								<div className="admin-content-wrapper px-14 py-14">
-									{children}
-								</div>
-							</>
+					user.data.role === 'admin' ? (
+						<div id="admin-layouts" className="">
+							<DrawerMenu navOpen={open} />
+							<AdminHeader handler={setOpen} value={open} />
+							<div
+								className={`bg-[#EAEDF7] min-h-screen pt-[60px] ${
+									open ? 'pl-[100px]' : 'pl-[240px]'
+								}`}
+							>
+								<>
+									<div className="admin-content-wrapper px-14 py-14">
+										{children}
+									</div>
+								</>
+							</div>
 						</div>
-					</div>
+					) : (
+						<Login />
+					)
 				) : (
 					<Login />
 				)

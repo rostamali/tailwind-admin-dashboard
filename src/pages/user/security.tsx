@@ -1,4 +1,4 @@
-import UserAuthLayout from '@/components/layouts/UserAuthLayout';
+import UserAuthLayout from 'src/components/layouts/UserAuthLayout';
 import Head from 'next/head';
 import { ReactElement, useState } from 'react';
 import { HiEye, HiEyeOff } from 'react-icons/hi';

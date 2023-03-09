@@ -1,28 +1,68 @@
 import Head from 'next/head';
-import UserAuthLayout from '@/components/layouts/UserAuthLayout';
+import UserAuthLayout from 'src/components/layouts/UserAuthLayout';
 import { ReactElement, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useFetchData, useUpdateData } from '@/hooks/useApi';
-import Picture from '@/components/common/Picture';
-import SelectPhotos from '@/components/common/SelectPhotos';
-import ButtonLoader from '@/components/common/ButtonLoader';
+import {
+	useDeleteData,
+	useFetchData,
+	useUpdateData,
+	useUpdateMultipartData,
+} from 'src/hooks/useApi';
+import Picture from 'src/components/common/shared/Picture';
+import ButtonLoader from 'src/components/common/shared/ButtonLoader';
+import { FiUploadCloud } from 'react-icons/fi';
+import Spinner from 'src/components/common/shared/Spinner';
+import Login from '../login';
+import { handleDeleteConfirm } from 'src/utils/confirmation';
 
 const MyAccount = () => {
-	const [photo, setPhoto] = useState<string[]>([]);
+	const [photo, setPhoto] = useState<File>();
 	const { data: user, isLoading: loadingUser } = useFetchData(
 		'/api/auth/profile',
 		'auth',
 		1,
 	);
+	const { mutate: updateUserMultiPartInfo, isLoading: isUpdateMultipart } =
+		useUpdateMultipartData('auth');
 	const { mutate: updateUserInfo, isLoading: isUpdate } =
 		useUpdateData('auth');
+
+	const { mutate: deleteAccount } = useDeleteData('auth');
+
+	const handleImage = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files;
+		if (file) {
+			setPhoto(file[0]);
+		}
+	};
 	const { register, handleSubmit } = useForm();
 	const updateUser = (data: any) => {
-		data.thumbnail = photo[0];
-		updateUserInfo({
-			url: `/api/auth/update`,
-			body: data,
-		});
+		if (photo) {
+			let formData = new FormData();
+			formData.append('thumbnail', photo as File);
+			formData.append('firstName', data.firstName);
+			formData.append('lastName', data.lastName);
+			formData.append('email', data.email);
+			updateUserMultiPartInfo({
+				url: `/api/file/update/user`,
+				body: formData,
+			});
+		} else {
+			updateUserInfo({
+				url: '/api/auth/update/user',
+				body: data,
+			});
+		}
+	};
+
+	const handleDeleteAccount = () => {
+		handleDeleteConfirm('Are you sure ?', 'Account will be deleted !').then(
+			(result) => {
+				if (result.isConfirmed) {
+					deleteAccount(`/api/auth/user/delete`);
+				}
+			},
+		);
 	};
 
 	return (
@@ -39,104 +79,135 @@ const MyAccount = () => {
 				/>
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
-			<div className="my-info">
-				<h3 className="user-page-title">User Info</h3>
-				<form
-					className="admin-form"
-					onSubmit={handleSubmit(updateUser)}
-				>
-					<div className="w-2/5 flex flex-col items-start gap-8 pb-12">
-						{photo.length ? (
-							<Picture
-								link={`/uploads/${photo[0]}`}
-								classList={
-									'h-[120px] w-[120px] border-2 border-[#6259CA] rounded-full'
-								}
-								alt={''}
-							/>
-						) : (
-							<Picture
-								link={`/uploads/${user.data.thumbnail}`}
-								classList={
-									'h-[120px] w-[120px] border-2 border-[#6259CA] rounded-full'
-								}
-								alt={user.data.name}
-							/>
-						)}
-						<div>
-							<SelectPhotos
-								btnText={'Upload Thumbnail'}
-								handler={setPhoto}
-								single={true}
-								defaultVal={photo}
-								preview={false}
-							/>
-							<span className="pt-2 block">
-								Only allow png & jpg files
-							</span>
-						</div>
-					</div>
-					<div className="grid grid-cols-2 gap-8">
-						<div className="input__group flex flex-col">
-							<label htmlFor="name" className="input__label">
-								Full Name
-							</label>
-							<input
-								id="name"
-								type="text"
-								defaultValue={user.data.name}
-								className="input__field"
-								{...register('name')}
-							/>
-						</div>
-						<div className="input__group">
-							<label htmlFor="email" className="input__label">
-								E-mail
-							</label>
-							<input
-								type="email"
-								id="email"
-								defaultValue={user.data.email}
-								className="input__field"
-								{...register('email')}
-							/>
-						</div>
-						<div className="input__group">
-							<label className="input__label">Role</label>
-							<select
-								className="input__field"
-								defaultValue={user.data.role}
-								{...register('role')}
-							>
-								<option value="admin">Admin</option>
-								<option value="editor">Editor</option>
-								<option value="user">User</option>
-							</select>
-						</div>
-						<div className="input__group">
-							<label className="input__label">
-								Account Status
-							</label>
-							<select
-								className="input__field"
-								defaultValue={
-									user.data.active ? 'true' : 'false'
-								}
-								{...register('active')}
-							>
-								<option value="true">Active</option>
-								<option value="false">Inactive</option>
-							</select>
-						</div>
-					</div>
-					<button
-						className="submit__btn mt-8 h-[52px] w-[172px]"
-						disabled={isUpdate}
+			{loadingUser ? (
+				<div className="flex items-center justify-center h-[70vh]">
+					<Spinner />
+				</div>
+			) : user.status === 'success' ? (
+				<div className="my-info">
+					<h3 className="user-page-title">User Info</h3>
+					<form
+						className="admin-form"
+						onSubmit={handleSubmit(updateUser)}
 					>
-						{isUpdate ? <ButtonLoader /> : 'Save Changes'}
-					</button>
-				</form>
-			</div>
+						<div className="w-2/5 flex flex-col items-start gap-8 pb-12">
+							{photo ? (
+								<Picture
+									link={URL.createObjectURL(photo)}
+									classList={
+										'h-[120px] w-[120px] border-2 border-orange-dark rounded-full'
+									}
+									alt={''}
+								/>
+							) : (
+								<Picture
+									link={`/uploads/${user.data.thumbnail}`}
+									classList={
+										'h-[120px] w-[120px] border-2 border-orange-dark rounded-full'
+									}
+									alt={user.data.name}
+								/>
+							)}
+							<div>
+								<label
+									htmlFor="user-thumbnail"
+									className="bg-orange-dark py-3 text-white rounded-md cursor-pointer flex items-center justify-center gap-3 px-4"
+								>
+									<FiUploadCloud />
+									Upload Thumbanil
+								</label>
+								<input
+									id="user-thumbnail"
+									type="file"
+									className="hidden"
+									onChange={handleImage}
+								/>
+							</div>
+						</div>
+						<div className="grid grid-cols-2 gap-8">
+							<div className="input__group flex flex-col">
+								<label htmlFor="name" className="input__label">
+									Username
+								</label>
+								<input
+									id="name"
+									type="text"
+									disabled
+									defaultValue={user.data.userName}
+									className="input__field"
+									{...register('name')}
+								/>
+							</div>
+							<div className="input__group">
+								<label htmlFor="email" className="input__label">
+									E-mail
+								</label>
+								<input
+									type="email"
+									id="email"
+									disabled
+									defaultValue={user.data.email}
+									className="input__field"
+									{...register('email')}
+								/>
+							</div>
+							<div className="input__group flex flex-col">
+								<label
+									htmlFor="firstName"
+									className="input__label"
+								>
+									First Name
+								</label>
+								<input
+									id="firstName"
+									type="text"
+									defaultValue={user.data.firstName}
+									className="input__field"
+									{...register('firstName')}
+								/>
+							</div>
+							<div className="input__group flex flex-col">
+								<label
+									htmlFor="lastName"
+									className="input__label"
+								>
+									Last Name
+								</label>
+								<input
+									id="lastName"
+									type="text"
+									defaultValue={user.data.lastName}
+									className="input__field"
+									{...register('lastName')}
+								/>
+							</div>
+						</div>
+						<div className="flex items-center justify-between mt-8">
+							<button
+								className="submit__btn h-[52px] w-[172px]"
+								disabled={
+									isUpdateMultipart || isUpdate ? true : false
+								}
+							>
+								{isUpdateMultipart || isUpdate ? (
+									<ButtonLoader />
+								) : (
+									'Save Changes'
+								)}
+							</button>
+							<button
+								type="button"
+								className="outline__btn"
+								onClick={handleDeleteAccount}
+							>
+								Delete Account
+							</button>
+						</div>
+					</form>
+				</div>
+			) : (
+				<Login />
+			)}
 		</>
 	);
 };

@@ -1,8 +1,8 @@
 import { Schema, model, models } from 'mongoose';
 
-const userSchema = new Schema(
+export const userSchema = new Schema(
 	{
-		name: {
+		userName: {
 			type: String,
 			required: [true, 'Must need user name'],
 			trim: true,
@@ -10,8 +10,17 @@ const userSchema = new Schema(
 			maxLength: 30,
 			unique: true,
 		},
-		slug: {
+		firstName: {
 			type: String,
+			trim: true,
+			minLength: 2,
+			maxLength: 30,
+		},
+		lastName: {
+			type: String,
+			trim: true,
+			minLength: 2,
+			maxLength: 30,
 		},
 		email: {
 			type: String,
@@ -42,6 +51,10 @@ const userSchema = new Schema(
 			type: Boolean,
 			default: true,
 			select: false,
+		},
+		cart: {
+			type: Schema.Types.ObjectId,
+			ref: 'Cart',
 		},
 	},
 	{ timestamps: true },

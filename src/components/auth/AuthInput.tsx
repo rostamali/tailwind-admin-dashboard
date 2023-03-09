@@ -2,6 +2,7 @@ import { FieldValues, UseFormRegister, FieldErrors } from 'react-hook-form';
 import { ErrorMessage } from '@hookform/error-message';
 import { HiEye, HiEyeOff } from 'react-icons/hi';
 import { useState } from 'react';
+import { IField } from 'src/types';
 
 interface AuthFormProps {
 	register: UseFormRegister<FieldValues>;
@@ -11,7 +12,6 @@ interface AuthFormProps {
 
 const AuthInput: React.FC<AuthFormProps> = ({ register, template, errors }) => {
 	const [showPassword, setShowPassword] = useState(false);
-
 	return (
 		<>
 			{template.map((field, index) => (

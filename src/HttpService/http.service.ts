@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 
 const axiosConfig: AxiosRequestConfig = {
-	baseURL: 'http://localhost:3000',
+	baseURL: process.env.BASE_URL,
 	timeout: 25000,
 	headers: {
 		'Access-Control-Allow-Origin': '*',
@@ -24,6 +24,15 @@ class axiosReq {
 	async createMultipart(url: string, data: any) {
 		return await instance
 			.post<any>(url, data, {
+				headers: {
+					'Content-type': 'multipart/form-data',
+				},
+			})
+			.then((res) => res.data);
+	}
+	async updateMultipart(url: string, data: any) {
+		return await instance
+			.put(url, data, {
 				headers: {
 					'Content-type': 'multipart/form-data',
 				},
